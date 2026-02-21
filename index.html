@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LicenseHub — Iniciar Sesión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Login-specific ── */
+    body.login-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Animated background orbs */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: floatOrb 12s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, #6366f1, #4f46e5);
+      top: -120px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #8b5cf6, #7c3aed);
+      bottom: -80px;
+      right: -80px;
+      animation-delay: -4s;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #06b6d4, #0891b2);
+      top: 40%;
+      left: 55%;
+      animation-delay: -8s;
+    }
+
+    @keyframes floatOrb {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(30px, 20px) scale(1.08);
+      }
+    }
+
+    /* Login card */
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 40px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 24px;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .login-logo .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .login-logo .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .login-logo .logo-text span {
+      color: #818cf8;
+    }
+
+    .login-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 36px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group .input-wrap {
+      position: relative;
+    }
+
+    .form-group .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #f1f5f9;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-group input::placeholder {
+      color: #475569;
+    }
+
+    .form-group input:focus {
+      border-color: rgba(99, 102, 241, 0.6);
+      background: rgba(99, 102, 241, 0.08);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      color: #fca5a5;
+      margin-bottom: 20px;
+      animation: shake 0.4s ease;
+    }
+
+    .error-msg.show {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-6px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(6px);
+      }
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+      letter-spacing: 0.2px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: #475569;
+    }
+  </style>
+</head>
+
+<body class="login-page">
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🔑</div>
+      <div class="logo-text">License<span>Hub</span></div>
+    </div>
+    <h1 class="login-title">Bienvenido</h1>
+    <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+
+    <div class="error-msg" id="errorMsg">
+      <span>⚠️</span> Usuario o contraseña incorrectos
+    </div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Correo electrónico</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="username" placeholder="ejemplo@correo.com" autocomplete="username" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+      <button type="submit" class="btn-login">Iniciar Sesión</button>
+    </form>
+
+    <p class="login-footer" style="margin-top: 20px;">
+      ¿No tienes cuenta? <a href="#" id="toggleMode"
+        style="color: #818cf8; text-decoration: none; font-weight: 500;">Regístrate aquí</a>
+    </p>
+
+    <div class="login-footer">LicenseHub v1.0 — Gestión de Licencias de Software</div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const auth = window.lh_auth;
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.querySelector('.btn-login');
+    const toggleBtn = document.getElementById('toggleMode');
+    const title = document.querySelector('.login-title');
+    const subtitle = document.querySelector('.login-subtitle');
+
+    let isRegisterMode = false;
+
+    // Redirect if already logged in according to Firebase
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      isRegisterMode = !isRegisterMode;
+      if (isRegisterMode) {
+        title.textContent = 'Crear Cuenta';
+        subtitle.textContent = 'Regístrate para gestionar licencias';
+        submitBtn.textContent = 'Registrarse';
+        toggleBtn.innerHTML = '¿Ya tienes cuenta? <span style="color: #818cf8;">Inicia sesión</span>';
+      } else {
+        title.textContent = 'Bienvenido';
+        subtitle.textContent = 'Ingresa tus credenciales para continuar';
+        submitBtn.textContent = 'Iniciar Sesión';
+        toggleBtn.innerHTML = '¿No tienes cuenta? <span style="color: #818cf8;">Regístrate aquí</span>';
+      }
+      errorMsg.classList.remove('show');
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+
+      if (!email || !password) {
+        showError('⚠️ Por favor ingresa correo y contraseña.');
+        return;
+      }
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        submitBtn.textContent = 'Cargando...';
+
+        if (isRegisterMode) {
+          await auth.createUserWithEmailAndPassword(email, password);
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+        }
+        // onAuthStateChanged will redirect automatically
+      } catch (error) {
+        console.error(error);
+        let userMessage = 'Usuario o contraseña incorrectos';
+        if (error.code === 'auth/email-already-in-use') userMessage = 'El correo ya está registrado.';
+        if (error.code === 'auth/weak-password') userMessage = 'La contraseña debe tener al menos 6 caracteres.';
+        if (error.code === 'auth/invalid-email') userMessage = 'Formato de correo inválido.';
+        if (error.code === 'auth/invalid-credential') userMessage = 'Credenciales incorrectas.';
+
+        showError('⚠️ ' + userMessage);
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.textContent = isRegisterMode ? 'Registrarse' : 'Iniciar Sesión';
+      }
+    });
+
+    function showError(msg) {
+      errorMsg.innerHTML = msg;
+      errorMsg.classList.add('show');
+      setTimeout(() => errorMsg.classList.remove('show'), 5000);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LicenseHub — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        /* ── Layout ── */
+        body {
+            min-height: 100vh;
+            background: var(--bg-base);
+            transition: background 0.4s ease;
+        }
+
+        /* Dynamic mesh background (overridden by theme) */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: var(--mesh-bg,
+                    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.10) 0%, transparent 55%),
+                    radial-gradient(ellipse 50% 60% at 60% 30%, rgba(6, 182, 212, 0.06) 0%, transparent 50%));
+            pointer-events: none;
+            transition: background 0.4s ease;
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 64px;
+            background: rgba(8, 12, 20, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-brand .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .nav-brand .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-brand .brand-name span {
+            color: var(--accent-light, #818cf8);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 6px 14px 6px 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 99px;
+        }
+
+        .nav-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-username {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .btn-nav {
+            padding: 7px 13px;
+            font-size: 13px;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+        }
+
+        .btn-nav:hover {
+            background: var(--glass-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-nav.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .btn-nav.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* ── Tabs ── */
+        .tabs-bar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 32px;
+            background: rgba(8, 12, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color var(--transition), border-color var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent, #6366f1);
+        }
+
+        .tab-btn .tab-icon {
+            font-size: 16px;
+        }
+
+        .tab-count {
+            padding: 2px 7px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active .tab-count {
+            background: var(--accent-glow, rgba(99, 102, 241, 0.2));
+            color: var(--accent-light, #818cf8);
+        }
+
+        /* ── Main content ── */
+        .main {
+            padding: 28px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Stats grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            padding: 20px 22px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .stat-card.s1::before {
+            background: var(--accent-gradient, linear-gradient(90deg, #6366f1, #8b5cf6));
+        }
+
+        .stat-card.s2::before {
+            background: linear-gradient(90deg, #06b6d4, #0891b2);
+        }
+
+        .stat-card.s3::before {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .stat-card.s4::before {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .stat-value .currency {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-right: 2px;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            opacity: 0.13;
+        }
+
+        /* Multi-currency stat lines */
+        .stat-multi-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .stat-currency-line {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            line-height: 1.1;
+        }
+
+        .stat-currency-line .s-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-currency-line .s-amount.smaller {
+            font-size: 18px;
+        }
+
+        .stat-currency-line .s-cur {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ── Renewal banner ── */
+        .renewal-banner {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #fcd34d;
+        }
+
+        .renewal-banner.show {
+            display: flex;
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-wrap .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-select {
+            padding: 10px 14px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            cursor: pointer;
+            transition: border-color var(--transition);
+        }
+
+        .filter-select:focus {
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .filter-select option {
+            background: #1e293b;
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 22px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .table-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table-count {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background var(--transition);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        tbody td {
+            padding: 13px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        .td-name {
+            font-weight: 600;
+        }
+
+        .td-vendor {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .td-cost {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .td-cost .cycle {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .td-renewal {
+            font-size: 13px;
+        }
+
+        .td-renewal.soon {
+            color: #fcd34d;
+            font-weight: 500;
+        }
+
+        .td-renewal.overdue {
+            color: #fca5a5;
+            font-weight: 500;
+        }
+
+        .td-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 14px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .empty-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ── Category breakdown ── */
+        .breakdown-section {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 12px;
+        }
+
+        .breakdown-card {
+            padding: 15px 17px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            transition: transform var(--transition);
+        }
+
+        .breakdown-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .breakdown-icon {
+            font-size: 22px;
+        }
+
+        .breakdown-info .b-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .breakdown-info .b-cost {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .breakdown-info .b-count {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ── Theme Panel ── */
+        .theme-panel {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 380px;
+            height: 100vh;
+            z-index: 500;
+            background: #0d1220;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .theme-panel.open {
+            right: 0;
+        }
+
+        .theme-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            position: sticky;
+            top: 0;
+            background: #0d1220;
+            z-index: 1;
+        }
+
+        .theme-panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .theme-panel-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .theme-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+        }
+
+        /* Color row */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .color-row label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .color-row input[type="color"] {
+            width: 40px;
+            height: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            background: none;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .color-row input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-row input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+
+        .color-remove {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .color-remove:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-add-color {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 100%;
+        }
+
+        .btn-add-color:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+        }
+
+        .gradient-preview {
+            height: 48px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .angle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .angle-row label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .angle-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent, #6366f1);
+        }
+
+        .angle-val {
+            font-size: 13px;
+            color: var(--text-muted);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .preset-swatch {
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color var(--transition), transform var(--transition);
+        }
+
+        .preset-swatch:hover {
+            transform: scale(1.06);
+        }
+
+        .preset-swatch.selected {
+            border-color: #fff;
+        }
+
+        .theme-apply-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+            border: none;
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: opacity var(--transition), transform var(--transition);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .theme-apply-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: var(--text-secondary);
+        }
+
+        .mode-btn.active {
+            background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .theme-reset-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-top: 8px;
+        }
+
+        .theme-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+        }
+
+        /* Overlay backdrop for theme panel */
+        .panel-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 499;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .panel-backdrop.open {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a class="nav-brand" href="#">
+                <div class="brand-icon">🔑</div>
+                <div class="brand-name">License<span>Hub</span></div>
+            </a>
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar" id="navAvatar">A</div>
+                    <span class="nav-username" id="navUsername">admin</span>
+                </div>
+                <button class="btn-nav" onclick="openThemePanel()" title="Personalizar tema">🎨 Tema</button>
+                <button class="btn-nav danger" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </nav>
+
+        <!-- Tabs -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" id="tab-work" onclick="switchTab('work')">
+                <span class="tab-icon">💼</span> Trabajo
+                <span class="tab-count" id="count-work">0</span>
+            </button>
+            <button class="tab-btn" id="tab-personal" onclick="switchTab('personal')">
+                <span class="tab-icon">🏠</span> Personal
+                <span class="tab-count" id="count-personal">0</span>
+            </button>
+        </div>
+
+        <!-- Main -->
+        <main class="main">
+            <!-- Page header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" id="pageTitle">Panel — Trabajo</h1>
+                    <p class="page-subtitle" id="pageSubtitle">Licencias y suscripciones de trabajo</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal()">
+                    <span>＋</span> Nueva Licencia
+                </button>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="stats-grid">
+                <div class="stat-card s1">
+                    <div class="stat-label">Ingreso Mensual</div>
+                    <div class="stat-value">
+                        <span class="currency">$</span>
+                        <input type="number" id="statIncome" class="inline-input" placeholder="0"
+                            onchange="saveIncome(this.value)" />
+                    </div>
+                    <div class="stat-sub">Balance: <strong id="statBalance"
+                            style="color:var(--text-primary)">$0.00</strong></div>
+                    <div class="stat-sub">Proyección (1a): <span id="statProjected"
+                            style="color:var(--text-secondary)">$0.00</span></div>
+                    <div class="stat-icon">💰</div>
+                </div>
+
+                <div class="stat-card s4" style="grid-column: span 2">
+                    <div class="stat-label" style="display:flex;justify-content:space-between">
+                        <span>Meta de Ahorro</span>
+                        <button class="btn-xs-edit" onclick="openSavingsModal()">⚙️ Configurar</button>
+                    </div>
+                    <div style="display:flex; gap:20px; align-items:center; margin-top:5px">
+                        <div>
+                            <div class="stat-value" id="savingsTargetDisplay">$0</div>
+                            <div class="stat-sub" id="savingsStatus">Sin meta definida</div>
+                        </div>
+                        <div style="flex:1; padding-left:20px; border-left:1px solid rgba(255,255,255,0.1)">
+                            <div style="font-size:13px; color:var(--text-muted)">Necesitas:</div>
+                            <div style="font-size:18px; font-weight:700; color:#fff" id="savingsMonthlyNeeded">$0/mes
+                            </div>
+                            <div style="font-size:12px; color:var(--accent-light)" id="savingsPercent">0% de ingreso
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-sub"
+                        style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); font-style:italic"
+                        id="savingsRecommendations">
+                        Define una meta para ver sugerencias.
+                    </div>
+                    <div class="stat-icon">🐷</div>
+                </div>
+
+                <div class="stat-card s2">
+                    <div class="stat-label">Costo Mensual</div>
+                    <div class="stat-multi-lines" id="statMonthlyLines">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="stat-sub"><span id="statActive">0</span> activas</div>
+                    <div class="stat-icon">📅</div>
+                </div>
+            </div>
+
+            <!-- Renewal banner -->
+            <div class="renewal-banner" id="renewalBanner">
+                <span>⚠️</span>
+                <span id="renewalBannerText"></span>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput"
+                        placeholder="Buscar por nombre, proveedor..." oninput="renderTable()" />
+                </div>
+                <select class="filter-select" id="filterCategory" onchange="renderTable()">
+                    <option value="">Todas las categorías</option>
+                    <option>Sueldo</option>
+                    <option>Productividad</option>
+                    <option>Seguridad / Antivirus</option>
+                    <option>Herramientas IA</option>
+                    <option>Desarrollo</option>
+                    <option>Almacenamiento Cloud</option>
+                    <option>Diseño</option>
+                    <option>Comunicación</option>
+                    <option>Entretenimiento</option>
+                    <option>Telecomunicaciones</option>
+                    <option>Gasolina</option>
+                    <option>Gasto diario</option>
+                    <option>Consumibles</option>
+                    <option>Otro</option>
+                </select>
+                <select class="filter-select" id="filterStatus" onchange="renderTable()">
+                    <option value="">Todos los estados</option>
+                    <option value="active">Activo</option>
+                    <option value="expired">Vencido</option>
+                    <option value="cancelled">Cancelado</option>
+                </select>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrap">
+                <div class="table-header">
+                    <span class="table-title">Registro de Licencias</span>
+                    <span class="table-count" id="tableCount">0 registros</span>
+                </div>
+                <div id="tableContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-title">Sin registros aún</div>
+                        <div class="empty-sub">Haz clic en "Nueva Licencia" para agregar tu primera suscripción</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category breakdown -->
+            <div class="breakdown-section">
+                <div class="section-title">Gasto por Categoría</div>
+                <div class="breakdown-grid" id="breakdownGrid">
+                    <div style="color:var(--text-muted);font-size:14px;padding:12px;">Sin datos aún.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ── Theme Panel ── -->
+    <div class="panel-backdrop" id="panelBackdrop" onclick="closeThemePanel()"></div>
+    <div class="theme-panel" id="themePanel">
+        <div class="theme-panel-header">
+            <span class="theme-panel-title">🎨 Personalizar Tema</span>
+            <button class="modal-close" onclick="closeThemePanel()">×</button>
+        </div>
+        <div class="theme-panel-body">
+
+            <!-- Dark / Light toggle -->
+            <div>
+                <div class="theme-section-label">Modo de pantalla</div>
+                <div style="display:flex;gap:8px;">
+                    <button id="btnDark" class="mode-btn active" onclick="setColorMode('dark')">🌙 Oscuro</button>
+                    <button id="btnLight" class="mode-btn" onclick="setColorMode('light')">☀️ Claro</button>
+                </div>
+            </div>
+
+            <!-- Presets -->
+            <div>
+                <div class="theme-section-label">Presets rápidos</div>
+                <div class="preset-grid" id="presetGrid"></div>
+            </div>
+
+            <!-- Accent gradient -->
+            <div>
+                <div class="theme-section-label">Color de acento</div>
+                <div id="accentColorRows"></div>
+                <button class="btn-add-color" onclick="addAccentColor()">＋ Agregar color</button>
+                <div class="angle-row">
+                    <label>Ángulo</label>
+                    <input type="range" id="accentAngle" min="0" max="360" value="135"
+                        oninput="updateAccentPreview()" />
+                    <span class="angle-val" id="accentAngleVal">135°</span>
+                </div>
+                <div class="gradient-preview" id="accentPreview"></div>
+            </div>
+
+            <!-- Background gradient -->
+            <div>
+                <div class="theme-section-label">Fondo / Orbs</div>
+                <div id="bgColorRows"></div>
+                <button class="btn-add-color" onclick="addBgColor()">＋ Agregar color</button>
+                <div class="angle-row">
+                    <label>Ángulo</label>
+                    <input type="range" id="bgAngle" min="0" max="360" value="135" oninput="updateBgPreview()" />
+                    <span class="angle-val" id="bgAngleVal">135°</span>
+                </div>
+                <div class="gradient-preview" id="bgPreview"></div>
+            </div>
+
+            <div>
+                <button class="theme-apply-btn" onclick="applyTheme()">Aplicar Tema</button>
+                <button class="theme-reset-btn" onclick="resetTheme()">↺ Restaurar predeterminado</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Add/Edit Modal ── -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">Nueva Licencia</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="field full">
+                        <label>Nombre del Software *</label>
+                        <input type="text" id="fName" placeholder="Ej. Microsoft 365" />
+                    </div>
+                    <div class="field">
+                        <label>Proveedor / Vendor</label>
+                        <input type="text" id="fVendor" placeholder="Ej. Microsoft" />
+                    </div>
+                    <div class="field">
+                        <label>Categoría *</label>
+                        <select id="fCategory">
+                            <option value="">Seleccionar...</option>
+                            <option>Sueldo</option>
+                            <option>Productividad</option>
+                            <option>Seguridad / Antivirus</option>
+                            <option>Herramientas IA</option>
+                            <option>Desarrollo</option>
+                            <option>Almacenamiento Cloud</option>
+                            <option>Diseño</option>
+                            <option>Comunicación</option>
+                            <option>Entretenimiento</option>
+                            <option>Telecomunicaciones</option>
+                            <option>Gasolina</option>
+                            <option>Gasto diario</option>
+                            <option>Consumibles</option>
+                            <option>Otro</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Costo *</label>
+                        <input type="number" id="fCost" placeholder="0.00" min="0" step="0.01" />
+                    </div>
+                    <div class="field full" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                        <input type="checkbox" id="fIsDaily" style="width: auto; margin: 0;" />
+                        <label for="fIsDaily" style="margin: 0; cursor: pointer;">Es gasto diario / único (Excluir de
+                            proyección anual)</label>
+                    </div>
+                    <div class="field">
+                        <label>Moneda</label>
+                        <select id="fCurrency">
+                            <option>USD</option>
+                            <option>MXN</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                            <option>COP</option>
+                            <option>ARS</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Ciclo de Cobro *</label>
+                        <select id="fCycle">
+                            <option value="monthly">Mensual</option>
+                            <option value="annual">Anual</option>
+                            <option value="one-time">Pago único</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Fecha de Compra</label>
+                        <input type="date" id="fPurchaseDate" />
+                    </div>
+                    <div class="field">
+                        <label>Próxima Renovación</label>
+                        <input type="date" id="fRenewal" />
+                    </div>
+                    <div class="field">
+                        <label>Método de Pago</label>
+                        <input type="text" id="fPayment" placeholder="Ej. Tarjeta de crédito" />
+                    </div>
+                    <div class="field">
+                        <label>Estado</label>
+                        <select id="fStatus">
+                            <option value="active">Activo</option>
+                            <option value="expired">Vencido</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label>Notas</label>
+                        <textarea id="fNotes" placeholder="Ej. 5 usuarios, incluye Teams..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveLicense()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Confirm Dialog ── -->
+    <div class="confirm-dialog" id="confirmDialog">
+        <div class="confirm-box">
+            <div class="confirm-icon">🗑️</div>
+            <div class="confirm-title">Eliminar Licencia</div>
+            <div class="confirm-msg">¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede
+                deshacer.</div>
+            <div class="confirm-actions">
+                <button class="btn btn-ghost" onclick="closeConfirm()">Cancelar</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast container ── -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Savings Modal -->
+    <div class="modal-overlay" id="savingsModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Configurar Plan de Ahorro</div>
+                <button class="modal-close" onclick="closeSavingsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label>Meta de Ahorro ($)</label>
+                    <input type="number" id="saveTarget" placeholder="Ej. 50000" />
+                </div>
+                <div class="field" style="margin-top:15px">
+                    <label>Plazo (meses)</label>
+                    <input type="number" id="saveMonths" placeholder="Ej. 12" />
+                </div>
+                <p style="margin-top:15px; font-size:13px; color:var(--text-muted)">
+                    Calcularemos cuánto necesitas ahorrar mensualmente y te daremos recomendaciones basadas en tus
+                    gastos actuales.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeSavingsModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveSavingsConfig()">Guardar Meta</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const auth = window.lh_auth;
+
+        const navUsername = document.getElementById('navUsername');
+        const navAvatar = document.getElementById('navAvatar');
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                const name = user.email.split('@')[0];
+                if (navUsername) navUsername.textContent = name;
+                if (navAvatar) navAvatar.textContent = name.charAt(0).toUpperCase();
+            }
+        });
+
+        window.logout = async () => {
+            try {
+                await auth.signOut();
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        };
+    </script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
