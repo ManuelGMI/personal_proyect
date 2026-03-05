@@ -941,6 +941,10 @@
                 <span class="tab-icon">🏠</span> Personal
                 <span class="tab-count" id="count-personal">0</span>
             </button>
+            <button class="tab-btn" id="tab-onetime" onclick="switchTab('onetime')">
+                <span class="tab-icon">🛒</span> Gastos Únicos
+                <span class="tab-count" id="count-onetime">0</span>
+            </button>
         </div>
 
         <!-- Main -->
@@ -1030,6 +1034,7 @@
                     <option>Desarrollo</option>
                     <option>Almacenamiento Cloud</option>
                     <option>Diseño</option>
+                    <option>Hardware / Equipo</option>
                     <option>Comunicación</option>
                     <option>Entretenimiento</option>
                     <option>Telecomunicaciones</option>
@@ -1044,6 +1049,9 @@
                     <option value="expired">Vencido</option>
                     <option value="cancelled">Cancelado</option>
                 </select>
+                <button class="btn btn-secondary" style="padding: 10px 14px;" onclick="exportToCSV()">
+                    📥 Exportar
+                </button>
             </div>
 
             <!-- Table -->
@@ -1157,6 +1165,7 @@
                             <option>Desarrollo</option>
                             <option>Almacenamiento Cloud</option>
                             <option>Diseño</option>
+                            <option>Hardware / Equipo</option>
                             <option>Comunicación</option>
                             <option>Entretenimiento</option>
                             <option>Telecomunicaciones</option>
@@ -1170,7 +1179,8 @@
                         <label>Costo *</label>
                         <input type="number" id="fCost" placeholder="0.00" min="0" step="0.01" />
                     </div>
-                    <div class="field full" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                    <div class="field full" id="fieldIsDaily"
+                        style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
                         <input type="checkbox" id="fIsDaily" style="width: auto; margin: 0;" />
                         <label for="fIsDaily" style="margin: 0; cursor: pointer;">Es gasto diario / único (Excluir de
                             proyección anual)</label>
@@ -1186,7 +1196,7 @@
                             <option>ARS</option>
                         </select>
                     </div>
-                    <div class="field">
+                    <div class="field" id="fieldCycle">
                         <label>Ciclo de Cobro *</label>
                         <select id="fCycle">
                             <option value="monthly">Mensual</option>
@@ -1198,7 +1208,7 @@
                         <label>Fecha de Compra</label>
                         <input type="date" id="fPurchaseDate" />
                     </div>
-                    <div class="field">
+                    <div class="field" id="fieldRenewal">
                         <label>Próxima Renovación</label>
                         <input type="date" id="fRenewal" />
                     </div>

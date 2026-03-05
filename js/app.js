@@ -34,6 +34,7 @@ let activeTab = sessionStorage.getItem('lh_tab') || 'work';
 const TAB_CONFIG = {
     work: { label: 'Trabajo', subtitle: 'Licencias y suscripciones de trabajo', icon: '💼' },
     personal: { label: 'Personal', subtitle: 'Suscripciones y servicios personales', icon: '🏠' },
+    onetime: { label: 'Gastos Únicos', subtitle: 'Refacciones, equipo, licencias únicas', icon: '🛒' },
 };
 
 function switchTab(tab) {
@@ -84,6 +85,7 @@ const CAT_CONFIG = {
     'Productividad': { icon: '💼', color: '#6366f1' },
     'Seguridad / Antivirus': { icon: '🛡️', color: '#10b981' },
     'Herramientas IA': { icon: '🤖', color: '#8b5cf6' },
+    'Hardware / Equipo': { icon: '🖥️', color: '#64748b' },
     'Desarrollo': { icon: '💻', color: '#06b6d4' },
     'Almacenamiento Cloud': { icon: '☁️', color: '#0ea5e9' },
     'Diseño': { icon: '🎨', color: '#f59e0b' },
@@ -182,9 +184,10 @@ function markAsPaid(id) {
 
 // ── Tab counts in tab bar ────────────────────────
 function updateTabCounts() {
-    ['work', 'personal'].forEach(tab => {
+    ['work', 'personal', 'onetime'].forEach(tab => {
         const all = loadLicenses(tab);
-        document.getElementById(`count-${tab}`).textContent = all.length;
+        const countEl = document.getElementById(`count-${tab}`);
+        if (countEl) countEl.textContent = all.length;
     });
 }
 
@@ -451,6 +454,76 @@ function escHtml(str) {
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ── Export to CSV ────────────────────────────────
+function exportToCSV() {
+    const licenses = loadLicenses();
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const catF = document.getElementById('filterCategory').value;
+    const statusF = document.getElementById('filterStatus').value;
+
+    const filtered = licenses.filter(l => {
+        const matchSearch = !search ||
+            l.name.toLowerCase().includes(search) ||
+            (l.vendor || '').toLowerCase().includes(search) ||
+            (l.category || '').toLowerCase().includes(search);
+        const matchCat = !catF || l.category === catF;
+        const matchStatus = !statusF || l.status === statusF;
+        return matchSearch && matchCat && matchStatus;
+    });
+
+    if (filtered.length === 0) {
+        showToast('No hay datos para exportar', 'error');
+        return;
+    }
+
+    // CSV Headers
+    const headers = [
+        'ID', 'Nombre', 'Proveedor', 'Categoría', 'Costo', 'Moneda',
+        'Ciclo', 'Fecha Compra', 'Próxima Renovación', 'Método Pago',
+        'Estado', 'Gasto Diario', 'Notas'
+    ];
+
+    // CSV Rows
+    const rows = filtered.map(l => {
+        return [
+            l.id,
+            `"${(l.name || '').replace(/"/g, '""')}"`,
+            `"${(l.vendor || '').replace(/"/g, '""')}"`,
+            `"${(l.category || '').replace(/"/g, '""')}"`,
+            l.cost,
+            l.currency,
+            l.billingCycle,
+            l.purchaseDate || '',
+            l.nextRenewal || '',
+            `"${(l.paymentMethod || '').replace(/"/g, '""')}"`,
+            l.status,
+            l.isDaily ? 'Sí' : 'No',
+            `"${(l.notes || '').replace(/"/g, '""')}"`
+        ].join(',');
+    });
+
+    // Add BOM for Excel UTF-8 support
+    const csvContent = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+
+    // Create Blob and Download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    // Naming logic: prefix with the active tab
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `Exportacion_${activeTab}_${dateStr}.csv`;
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Archivo descargado', 'success');
+}
+
 // ── Modal ────────────────────────────────────────
 let editingId = null;
 
@@ -494,7 +567,18 @@ function openModal(id = null) {
         title.textContent = 'Nuevo Registro / Gasto';
         // Auto-select today
         document.getElementById('fPurchaseDate').value = new Date().toISOString().slice(0, 10);
+        if (activeTab === 'onetime') {
+            document.getElementById('fCycle').value = 'one-time';
+            document.getElementById('fIsDaily').checked = true;
+        }
     }
+
+    // Hide/show UI fields based on tab
+    const isOnetime = (activeTab === 'onetime');
+    document.getElementById('fieldIsDaily').style.display = isOnetime ? 'none' : 'flex';
+    document.getElementById('fieldCycle').style.display = isOnetime ? 'none' : 'block';
+    document.getElementById('fieldRenewal').style.display = isOnetime ? 'none' : 'block';
+
     document.getElementById('modalOverlay').classList.add('open');
     setTimeout(() => document.getElementById('fName').focus(), 100);
 }
@@ -521,13 +605,13 @@ function saveLicense() {
         category,
         cost: parseFloat(cost),
         currency: document.getElementById('fCurrency').value,
-        billingCycle: document.getElementById('fCycle').value,
+        billingCycle: activeTab === 'onetime' ? 'one-time' : document.getElementById('fCycle').value,
         purchaseDate: document.getElementById('fPurchaseDate').value,
-        nextRenewal: document.getElementById('fRenewal').value,
+        nextRenewal: activeTab === 'onetime' ? '' : document.getElementById('fRenewal').value,
         paymentMethod: document.getElementById('fPayment').value.trim(),
         status: document.getElementById('fStatus').value,
         notes: document.getElementById('fNotes').value.trim(),
-        isDaily: document.getElementById('fIsDaily').checked,
+        isDaily: activeTab === 'onetime' ? true : document.getElementById('fIsDaily').checked,
     };
 
     if (editingId) {
