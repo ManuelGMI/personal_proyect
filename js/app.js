@@ -456,72 +456,92 @@ function escHtml(str) {
 
 // ── Export to CSV ────────────────────────────────
 function exportToCSV() {
-    const licenses = loadLicenses();
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const catF = document.getElementById('filterCategory').value;
-    const statusF = document.getElementById('filterStatus').value;
+    try {
+        const licenses = loadLicenses();
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const catF = document.getElementById('filterCategory').value;
+        const statusF = document.getElementById('filterStatus').value;
 
-    const filtered = licenses.filter(l => {
-        const matchSearch = !search ||
-            l.name.toLowerCase().includes(search) ||
-            (l.vendor || '').toLowerCase().includes(search) ||
-            (l.category || '').toLowerCase().includes(search);
-        const matchCat = !catF || l.category === catF;
-        const matchStatus = !statusF || l.status === statusF;
-        return matchSearch && matchCat && matchStatus;
-    });
+        const filtered = licenses.filter(l => {
+            const matchSearch = !search ||
+                l.name.toLowerCase().includes(search) ||
+                (l.vendor || '').toLowerCase().includes(search) ||
+                (l.category || '').toLowerCase().includes(search);
+            const matchCat = !catF || l.category === catF;
+            const matchStatus = !statusF || l.status === statusF;
+            return matchSearch && matchCat && matchStatus;
+        });
 
-    if (filtered.length === 0) {
-        showToast('No hay datos para exportar', 'error');
-        return;
+        if (filtered.length === 0) {
+            showToast('No hay datos para exportar', 'error');
+            return;
+        }
+
+        // CSV Headers
+        const headers = [
+            'ID', 'Nombre', 'Proveedor', 'Categoría', 'Costo', 'Moneda',
+            'Ciclo', 'Fecha Compra', 'Próxima Renovación', 'Método Pago',
+            'Estado', 'Gasto Diario', 'Notas'
+        ];
+
+        // CSV Rows
+        const rows = filtered.map(l => {
+            return [
+                l.id,
+                `"${(l.name || '').replace(/"/g, '""')}"`,
+                `"${(l.vendor || '').replace(/"/g, '""')}"`,
+                `"${(l.category || '').replace(/"/g, '""')}"`,
+                l.cost,
+                l.currency,
+                l.billingCycle,
+                l.purchaseDate || '',
+                l.nextRenewal || '',
+                `"${(l.paymentMethod || '').replace(/"/g, '""')}"`,
+                l.status,
+                l.isDaily ? 'Sí' : 'No',
+                `"${(l.notes || '').replace(/"/g, '""')}"`
+            ].join(',');
+        });
+
+        // Add BOM for Excel UTF-8 support
+        const csvContent = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+
+        // Create Blob and Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+        // Naming logic: prefix with the active tab
+        const dateStr = new Date().toISOString().split('T')[0];
+        const fileName = `Exportacion_${activeTab}_${dateStr}.csv`;
+
+        // Workaround for mobile/safari and strict HTTPS policies (like GitHub Pages)
+        if (navigator.msSaveBlob) {
+            // IE 10+
+            navigator.msSaveBlob(blob, fileName);
+        } else {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            if (link.download !== undefined) {
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName);
+                link.style.position = 'absolute';
+                link.style.left = '-9999px';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                // Clean up the object URL to avoid memory leaks
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            } else {
+                // Fallback if 'download' attribute is not supported
+                window.open(url, '_blank');
+            }
+        }
+
+        showToast('Archivo descargado', 'success');
+    } catch (err) {
+        console.error('Export Error:', err);
+        showToast('Error al exportar los datos', 'error');
     }
-
-    // CSV Headers
-    const headers = [
-        'ID', 'Nombre', 'Proveedor', 'Categoría', 'Costo', 'Moneda',
-        'Ciclo', 'Fecha Compra', 'Próxima Renovación', 'Método Pago',
-        'Estado', 'Gasto Diario', 'Notas'
-    ];
-
-    // CSV Rows
-    const rows = filtered.map(l => {
-        return [
-            l.id,
-            `"${(l.name || '').replace(/"/g, '""')}"`,
-            `"${(l.vendor || '').replace(/"/g, '""')}"`,
-            `"${(l.category || '').replace(/"/g, '""')}"`,
-            l.cost,
-            l.currency,
-            l.billingCycle,
-            l.purchaseDate || '',
-            l.nextRenewal || '',
-            `"${(l.paymentMethod || '').replace(/"/g, '""')}"`,
-            l.status,
-            l.isDaily ? 'Sí' : 'No',
-            `"${(l.notes || '').replace(/"/g, '""')}"`
-        ].join(',');
-    });
-
-    // Add BOM for Excel UTF-8 support
-    const csvContent = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
-
-    // Create Blob and Download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    // Naming logic: prefix with the active tab
-    const dateStr = new Date().toISOString().split('T')[0];
-    const fileName = `Exportacion_${activeTab}_${dateStr}.csv`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast('Archivo descargado', 'success');
 }
 
 // ── Modal ────────────────────────────────────────
